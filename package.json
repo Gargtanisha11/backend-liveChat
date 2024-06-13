@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "backend for live chat app",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [
     "livechat",
@@ -12,5 +13,13 @@
     "node"
   ],
   "author": "Tanisha Garg",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3",
+    "prettier": "^3.3.2"
+  }
 }
