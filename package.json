@@ -1,0 +1,16 @@
+{
+  "name": "backend_livechat",
+  "version": "1.0.0",
+  "description": "backend for live chat app",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "livechat",
+    "backend",
+    "node"
+  ],
+  "author": "Tanisha Garg",
+  "license": "ISC"
+}
