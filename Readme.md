@@ -15,11 +15,14 @@
     10 add db_name in constants file
     11.create method for db connectionin db folder index.js( iify function )
     12.install dotenv package
-    13 create ApiError and ApiResponse class for send the data in  structured way 
+    13. create ApiError and ApiResponse class for send the data in  structured way 
     14. use then and catch to ad event listener to our app in then and throw error in catch in index.js files
-    
+
+    15.install cookie-parser and cors npm package  and configure them using use method of express app (in env file we create cors_origin = * but we need to write url of frontend where we want to add this server ex=http//localhost:3000)
+    16.configuration for json file,urlencoded data,express.static() for store static file in static folder named as public
+
 # todo 
    read abt process
 
 # info 
- to use experimental feature we write in our script in package.json in dev command (-r dotenv/config  --experimental-json-modules) with previous 
+ to use experimental feature we write in our script in package.json in dev command (dotenv/config for use type module use to import )(-r dotenv/config  --experimental-json-modules) with previous 
