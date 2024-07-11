@@ -21,6 +21,12 @@
     15.install cookie-parser and cors npm package  and configure them using use method of express app (in env file we create cors_origin = * but we need to write url of frontend where we want to add this server ex=http//localhost:3000)
     16.configuration for json file,urlencoded data,express.static() for store static file in static folder named as public
 
+    17. create user model and its method(verify password ,hash password, generate accessToken and generate refreshToken(using))
+    18. install jwt for generate access token and refresh token  . install bcrypt to hash password and verify
+    19. create message model with id ,sender id,receiver id timestamp,content and isSeen
+    20. create chat model with id, participiant, message array with message id ,timestamps
+   
+
 # todo 
    read abt process
 
