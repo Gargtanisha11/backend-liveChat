@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from "cloudinary"
 import fs from "fs"
+import { getPublicIdFromFilePath } from "./helperFunction"
 
 cloudinary.config({
     cloud_name: process.env.CLOUD_NAME,
@@ -21,4 +22,18 @@ const uploadOnCloudinary = async (localFilePath)=>{
     }
 }
 
-export {uploadOnCloudinary}
+const deleteFromCloudinary=async(fileUrl)=>{
+    try {
+        // get the public id from local file path with the use of function 
+        // delete it using delete method of cloudinary
+        // return the response
+        if(!fileUrl) return null 
+         const publicId= getPublicIdFromFilePath(fileUrl);
+         const response = await cloudinary.uploader.destroy(publicId);
+         return response 
+
+    } catch (error) {
+        return error 
+    }
+}
+export {uploadOnCloudinary,deleteFromCloudinary}
