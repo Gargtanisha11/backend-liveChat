@@ -26,9 +26,9 @@
    21. for  form-data install and  configure multer middleware 
    22. To store  the avatar image on cloudinary intstall cloudinary and configure it. and create a method to uplaod file  
      on
-   23. create user controller  (registerUser ,loginUser )
-   24. add user route (register , login user )
-   25. create authenticate middleware    
+   23. create user controller  (registerUser, loginUser, logout )
+   24. add user route (register , login user ,logout)
+   25. create authenticate middleware(verifyJWT)    
 
 ### todo 
    read abt process
