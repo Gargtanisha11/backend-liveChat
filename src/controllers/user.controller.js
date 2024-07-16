@@ -2,7 +2,10 @@ import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  deleteFromCloudinary,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.js";
 import fs from "fs";
 import cookieParser from "cookie-parser";
 import { option } from "../constant.js";
@@ -123,4 +126,83 @@ const logoutUser = asyncHandler(async (req, res) => {
     .clearCookie("accessToken", option)
     .json(new ApiResponse(200, user, "successfully logged out"));
 });
-export { registerUser, loginUser,logoutUser };
+
+const changeOldPassword = asyncHandler(async (req, res) => {
+  // check if authenticate user or not (this will done using middleware)
+  // verify old password
+  // take the user id from req.user and change its password and save the user and return the  user details
+  const { password, oldPassword } = req.body;
+  if (password && oldPassword) {
+    throw new ApiError(401, " password and new  password  are required ");
+  }
+
+  const isCorrectPassword = await user.verifyPassword(oldPassword);
+  if (!isCorrectPassword) {
+    throw new ApiError(402, "incorrect password ");
+  }
+
+  const { _id } = req.user;
+  const user = await User.findByIdAndUpdate(
+    _id,
+    {
+      $set: {
+        password: password,
+      },
+    },
+    { new: true }
+  );
+  if (!user) {
+    throw new ApiError(401, " not able to update the password ");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, [], " password chaange successfully"));
+});
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  const { userName, fullName } = req.body;
+  const avatar = req.files.avatar[0].path;
+
+  if (!(userName || (fullName || avatar))) {
+    throw new ApiError(402, " username or fullName is required  ");
+  }
+
+  const { _id } = req.user;
+  const user = await User.findById(_id);
+  if (userName) {
+    user.userName = userName;
+  }
+  if (fullName) {
+    user.fullName = fullName;
+  }
+  if (avatar) {
+    const avatarFilePath = await uploadOnCloudinary(avatar);
+    if (!avatarFilePath.url) {
+      throw new ApiError(
+        501,
+        "unable to upload on cloudinary and error is " + avatarFilePath
+      );
+    }
+
+    const oldAvatarFileUrl = user.avatar;
+    user.avatar = avatarFilePath.url;
+    const isDeletedFromCloudinary =
+      await deleteFromCloudinary(oldAvatarFileUrl);
+    if (!isDeletedFromCloudinary) {
+      throw new ApiError(501, "not able to delete the file from cloudinary");
+    }
+  }
+
+  user.save({ validateBeforeSave: true });
+  const updatedUser = await User.findById(_id);
+  console.log(updatedUser);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, updatedUser, " successfully updated user details")
+    );
+});
+
+// user controller - change password, ,updateAccountDetails( userName, avatar) get user details,add chatlist
+export { registerUser, loginUser, logoutUser, changeOldPassword };
