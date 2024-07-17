@@ -1,3 +1,4 @@
+import mongoose, { Mongoose } from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
@@ -204,5 +205,40 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     );
 });
 
-// user controller - change password, ,updateAccountDetails( userName, avatar) get user details,add chatlist
-export { registerUser, loginUser, logoutUser, changeOldPassword };
+const getUserDetails =asyncHandler(async(req,res)=>{
+   const user =req.user;
+   return res.status(200).json(new ApiResponse(200,user," successfully fetch user details"));
+})
+
+const getChatList =asyncHandler(async(req,res)=>{
+    // get the user id 
+    // get the chat id from ChatList  and then find that ids from chatmodel and send the useful fields 
+
+    const {_id} = req.user;
+    const chatList= await User.aggregate([
+      {
+        $match:{
+          _id: new mongoose.Types.ObjectId(_id)
+        }
+      },
+      {
+        $lookup:{
+          from:"chats",
+          localField:"chatList",
+          foreignField:"_id",
+          as:"chatLists"
+        }
+
+      },
+    ]);
+
+    if(!chatList.length==0){
+      throw new ApiError(502, " not able to get the chat lists");
+    }
+
+    return res.status(200).json (new ApiError(200, chatList," successfully fetch the chat list"));
+})
+
+
+// user controller - change password, ,updateAccountDetails( userName, avatar) get user details,get chatList
+export { registerUser, loginUser, logoutUser, changeOldPassword,updateAccountDetails,getUserDetails,getChatList };
