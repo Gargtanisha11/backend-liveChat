@@ -1,4 +1,4 @@
-import mongoose, { Mongoose } from "mongoose";
+import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
@@ -132,27 +132,27 @@ const changeOldPassword = asyncHandler(async (req, res) => {
   // check if authenticate user or not (this will done using middleware)
   // verify old password
   // take the user id from req.user and change its password and save the user and return the  user details
-  const { password, oldPassword } = req.body;
-  if (password && oldPassword) {
+  const { newPassword, oldPassword } = req.body;
+  if (!(newPassword || oldPassword)) {
     throw new ApiError(401, " password and new  password  are required ");
   }
-
+  const user = await User.findById(req.user?._id);
   const isCorrectPassword = await user.verifyPassword(oldPassword);
   if (!isCorrectPassword) {
     throw new ApiError(402, "incorrect password ");
   }
 
   const { _id } = req.user;
-  const user = await User.findByIdAndUpdate(
+  const updatedUser = await User.findByIdAndUpdate(
     _id,
     {
       $set: {
-        password: password,
+        password: newPassword,
       },
     },
     { new: true }
   );
-  if (!user) {
+  if (!updatedUser) {
     throw new ApiError(401, " not able to update the password ");
   }
 
@@ -163,10 +163,10 @@ const changeOldPassword = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { userName, fullName } = req.body;
-  const avatar = req.files.avatar[0].path;
+  const avatar = req.files?.avatar[0]?.path;
 
-  if (!(userName || (fullName || avatar))) {
-    throw new ApiError(402, " username or fullName is required  ");
+  if (!((userName && fullName)|| avatar)) {
+    throw new ApiError(402, " username or fullName or avatar image is required  ");
   }
 
   const { _id } = req.user;
@@ -196,7 +196,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   }
 
   user.save({ validateBeforeSave: true });
-  const updatedUser = await User.findById(_id);
+  const updatedUser = await User.findById(_id).select( "-password -refreshToken ");
   console.log(updatedUser);
   return res
     .status(200)
@@ -206,7 +206,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 });
 
 const getUserDetails =asyncHandler(async(req,res)=>{
-   const user =req.user;
+   const user = await User.findById(req.user?._id).select( "-password -refreshToken ");
    return res.status(200).json(new ApiResponse(200,user," successfully fetch user details"));
 })
 

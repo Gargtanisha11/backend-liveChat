@@ -12,12 +12,12 @@ import { ApiError } from "../utils/ApiError.js";
 export const verifyJWT =asyncHandler(async(req,_,next)=>{
    try {
      const accessToken =req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer","");
-     console.log(accessToken);
+    
      if(!accessToken ){
          throw new ApiError(401," unauthorized access")
      }
      const decodedToken = jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET);
-     console.log(decodedToken );
+    
      const {_id} =decodedToken;
      if(!_id){
          throw new ApiError(400, " unauthorized access")
