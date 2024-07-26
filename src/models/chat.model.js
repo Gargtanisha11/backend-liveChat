@@ -13,7 +13,11 @@ const chatSchema = new mongoose.Schema({
             ref:'Message'
         }
     ],
-
+    lastMessage:{
+       type: new mongoose.Types.ObjectId,
+       ref:"Message"
+    }
+    
     
 },{timestamps:true}) 
 

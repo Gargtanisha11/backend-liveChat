@@ -27,8 +27,11 @@
    22. To store  the avatar image on cloudinary intstall cloudinary and configure it. and create a method to uplaod file  
      on
    23. create user controller  (registerUser, loginUser, logout,changeOldPassword, updateAccountDetails(userName,fullName,avatarUrl) , getUserDetail, getChatList )
-   24. add user route (register , login user ,logout)
+   24. add user route (register , login user ,logout, changeOldPAssword,updateAccountDetails,getUserDetails,)
    25. create authenticate middleware(verifyJWT)    
+  ## note add socket event on the server as well 
+   26. add chat controllers ( createOrGetChat, deleteChat , getAllChats);
+   27. add message controllers ( )
 
 ### todo 
    read abt process
