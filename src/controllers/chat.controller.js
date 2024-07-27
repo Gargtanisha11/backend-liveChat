@@ -145,6 +145,13 @@ const deleteChat=asyncHandler(async(req,res)=>{
     
 })
 const getAllChats= asyncHandler(async(req,res)=>{
+
+
+      const {chatId} = req.params;
+      if(!chatId){
+        throw new ApiError( 403, " not exist a chat of this chat id ")
+      }
+      
      const payload= await Chat.aggregate([
       {
          $match:{
@@ -156,6 +163,12 @@ const getAllChats= asyncHandler(async(req,res)=>{
          }
       },
       ...chatCommonAggregation()
+      ,
+      {
+        $sort:{
+          createdAt:-1,
+        }
+      }
      ]);
 
      if(!payload){
