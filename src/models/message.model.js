@@ -15,6 +15,12 @@ const messageSchema= new mongoose.Schema({
         type:String,
         required:true,
     },
+    
+    chat:{
+     type:new mongoose.Types.ObjectId,
+     required: true,
+     
+    },
     read_status:{
         type:Boolean,
         default:false
