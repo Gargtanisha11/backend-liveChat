@@ -62,7 +62,7 @@ const createOrGetChat = asyncHandler(async (req, res) => {
   // check if it send by user or not
   // check that is it not same as user id
 
-  const { receiverId } = req.body;
+  const { receiverId } = req.params;
   if (!receiverId) {
     throw new ApiError(401, " can't able to create chat without receiveID ");
   }

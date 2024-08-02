@@ -23,7 +23,12 @@ app.use(express.urlencoded({
 app.use(express.static("public"))
 
 
-import userRouter from "./routes/user.routes.js"
+import userRouter from "./routes/user.routes.js";
+import chatRouter from "./routes/chat.routes.js";
+import messageRouter from "./routes/message.routes.js";
+
 app.use("/api/v1/user",userRouter);
+app.use("/api/v1/chat",chatRouter);
+app.use("/api/v1/message",messageRouter);
 
 export {app}

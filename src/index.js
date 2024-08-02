@@ -5,7 +5,7 @@ dotenv.config({
     path:'./env'
 })
 
-connectionDB()
+connectionDB() // build the connection 
 .then(()=>{
     app.on("error",(error)=>{
         console.log(error)

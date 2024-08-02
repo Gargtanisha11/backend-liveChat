@@ -199,4 +199,4 @@ const sendMessage=asyncHandler(async(req,res)=>{
 
    return res.status(200).json(new ApiResponse(200,createdMessage," message send successfully "))
 })
-export { getAllMessage ,deleteMessage,sendMessage};
+export { getAllMessage ,deleteMessage,sendMessage}

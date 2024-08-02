@@ -31,7 +31,7 @@
    25. create authenticate middleware(verifyJWT)    
   ## note add socket event on the server as well 
    26. add chat controllers ( createOrGetChat, deleteChat , getAllChats);
-   27. add message controllers ( )
+   27. add message controllers ( getAllMessage, sendMessage, deleteMesssage)
 
 ### todo 
    read abt process
