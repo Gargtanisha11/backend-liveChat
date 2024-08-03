@@ -1,10 +1,11 @@
 // controller create chat , get message List  , add chat list to its participants, delete chat list
 
 import mongoose from "mongoose";
-import { Chat } from "../models/chat.model";
-import { ApiError } from "../utils/ApiError";
-import { asyncHandler } from "../utils/asyncHandler";
-import { ApiResponse } from "../utils/ApiResponse";
+import {User} from  "../models/user.model.js";
+import { Chat } from "../models/chat.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 
 const chatCommonAggregation = () => {
   return [
@@ -12,33 +13,37 @@ const chatCommonAggregation = () => {
     {
       $lookup: {
         from: "users",
-        localField: "paticipants",
+        localField: "participants",
         foreignField: "_id",
         as: "participants",
-        pipeline: {
-          project: {
-            password: 0,
-            refreshToken: 0,
-          },
-        },
+        pipeline:[
+          {
+            $project:{
+              userName:1,
+              fullName:1,
+              email:1,
+              avatar:1              
+            }
+          }
+        ]
       },
     },
     {
       $lookup: {
-        form: "messages",
+        from: "messages",
         localField: "lastMessage",
         foreignField: "_id",
         as: "lastMessage",
         pipeline: [
           {
             $lookup: {
-              form: "users",
+              from: "users",
               localField: "sender",
               foreignField: "_id",
               as: "sender",
               pipeline: [
                 {
-                  project: {
+                  $project: {
                     userName: 1,
                     fullName: 1,
                     avatar: 1,
@@ -48,10 +53,11 @@ const chatCommonAggregation = () => {
             },
           },
           {
-            $addField: {
-              lastMessage: { $first: "lastMessage" },
+            $addFields: {
+              lastMessage: { $first: "$lastMessage" },
             },
           },
+          
         ],
       },
     },
@@ -63,8 +69,10 @@ const createOrGetChat = asyncHandler(async (req, res) => {
   // check that is it not same as user id
 
   const { receiverId } = req.params;
-  if (!receiverId) {
-    throw new ApiError(401, " can't able to create chat without receiveID ");
+
+  const receiver = await User.findById(receiverId);
+  if (!receiver) {
+    throw new ApiError(401, "  wrong receiver id ");
   }
   if (req.user?._id.toString() === receiverId) {
     throw new ApiError(401, " not possible to sender and receiver are same");
@@ -72,109 +80,103 @@ const createOrGetChat = asyncHandler(async (req, res) => {
 
   // check if there is already any chat with same participants
   const alreadyChat = await Chat.aggregate([
-    {
-      $match: {
-        participants: {
-          $elemMatch: {
-            $eq: req.user?.id,
-          },
-        },
-        participants: {
-          $elemMatch: {
-            $eq: new mongoose.Types.ObjectId(),
-          },
-        },
-      },
-    },
+     {
+       $match:{
+        participants:{
+          $all:[new mongoose.Types.ObjectId(receiverId),new mongoose.Types.ObjectId(req?.user?._id)]}
+       }
+     },
+
     ...chatCommonAggregation(),
   ]);
-
-  if (alreadyChat) {
+  console.log(alreadyChat, new Date());
+  if (alreadyChat.length!=0) {
     return res
       .status(200)
       .json(new ApiResponse(200, alreadyChat, " get the chat list "));
   }
 
-   const newChatInstance= await Chat.create({
-    participants:[req.user?._id,sender],
-   })
-  
-   const createdChat =await Chat.aggregate([
-      {
-        $match:{
-          _id: newChatInstance?._id
-        }
+
+  const newChatInstance = await Chat.create({
+    participants: [req.user?._id, receiverId],
+  });
+
+  console.log(newChatInstance);
+  const createdChat = await Chat.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(newChatInstance?._id),
       },
-      ...chatCommonAggregation()
-   ])
+    },
+    ...chatCommonAggregation(),
+  ]);
 
-   if(!createdChat){
-     throw new ApiError(501, " not able to create chat")
-   }
+  if (!createdChat) {
+    throw new ApiError(501, " not able to create chat");
+  }
 
+  // emit the chat using socket to other participant
 
-   // emit the chat using socket to other participant  
-
-    return  res.status(200).json( new ApiResponse(200, createdChat," successfully created the chat "));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, createdChat, " successfully created the chat "));
 });
 
-
 // deleteChat
-const deleteChat=asyncHandler(async(req,res)=>{
-   // get the chat id 
-   // find that chat using find by id 
-   // delete that chat id 
-   const {chatId}= req.params;
-    const payload= await Chat.aggregate([
-      {
-        match:{
-          _id:new mongoose.Types.ObjectId(chatId)
-        }
+const deleteChat = asyncHandler(async (req, res) => {
+  // get the chat id
+  // find that chat using find by id
+  // delete that chat id
+  const { chatId } = req.params;
+  const payload = await Chat.aggregate([
+    {
+      match: {
+        _id: new mongoose.Types.ObjectId(chatId),
       },
-      ...chatCommonAggregation()
-    ]);
+    },
+    ...chatCommonAggregation(),
+  ]);
 
-    if(!payload){
-       throw new ApiError(402, " Chat doesn't exist ");
-    }
-    
-    const isDeleted = await Chat.findByIdAndDelete(payload._id);
+  if (!payload) {
+    throw new ApiError(402, " Chat doesn't exist ");
+  }
 
-    return res.status(200).json (new ApiResponse(200, payload, " your chat get deleted "))
+  const isDeleted = await Chat.findByIdAndDelete(payload._id);
 
-    
-})
-const getAllChats= asyncHandler(async(req,res)=>{
+  return res
+    .status(200)
+    .json(new ApiResponse(200, payload, " your chat get deleted "));
+});
+const getAllChats = asyncHandler(async (req, res) => {
+  const { chatId } = req.params;
+  if (!chatId) {
+    throw new ApiError(403, " not exist a chat of this chat id ");
+  }
 
-
-      const {chatId} = req.params;
-      if(!chatId){
-        throw new ApiError( 403, " not exist a chat of this chat id ")
-      }
-      
-     const payload= await Chat.aggregate([
-      {
-         $match:{
-           participants:{
-            $elemMatch:{
-               _id:new mongoose.Types.ObjectId(req?.user?._id)
-            }
-           }
-         }
+  const payload = await Chat.aggregate([
+    {
+      $match: {
+        participants: {
+          $elemMatch: {
+            _id: new mongoose.Types.ObjectId(req?.user?._id),
+          },
+        },
       },
-      ...chatCommonAggregation()
-      ,
-      {
-        $sort:{
-          createdAt:-1,
-        }
-      }
-     ]);
+    },
+    ...chatCommonAggregation(),
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+  ]);
 
-     if(!payload){
-       throw new ApiError(402,"  not any chat ")
-     }
-      return res.status(200).json( new ApiResponse(200, payload," all chat of the user"));
-})
+  if (!payload) {
+    throw new ApiError(402, "  not any chat ");
+  }
+  return res
+    .status(200)
+    .json(new ApiResponse(200, payload, " all chat of the user"));
+});
 
-export {createOrGetChat, deleteChat ,getAllChats}
+export { createOrGetChat, deleteChat, getAllChats };
