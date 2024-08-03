@@ -8,6 +8,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { Message } from "../models/message.model.js";
 import {User} from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
+import mongoose from "mongoose";
  // hello 
 /**
  * @description Utility function to get the pipeline which used commonly in every function
@@ -34,7 +35,7 @@ const chatMessageCommonAggregate = () => {
   return [
     {
       $lookup: {
-        from: "User",
+        from: "users",
         localField: "sender",
         foreignField: "_id",
         as: "sender",
@@ -42,7 +43,7 @@ const chatMessageCommonAggregate = () => {
     },
     {
       $lookup: {
-        from: "User",
+        from: "users",
         localField: "receiver",
         foreignField: "_id",
         as: "receiver",
@@ -50,7 +51,7 @@ const chatMessageCommonAggregate = () => {
     },
     {
       $project: {
-        conetnt: 1,
+        content: 1,
         sender: {
           name: 1,
           fullName: 1,
@@ -158,7 +159,7 @@ const deleteMessage = asyncHandler(async (req, res) => {
 
 const sendMessage=asyncHandler(async(req,res)=>{
    // get the sender id and receiver id and content from the user 
-   const {senderId,chatId} = req.params;
+   const {receiverId,chatId} = req.params;
    
    const {content} = req.body;
    
@@ -166,9 +167,9 @@ const sendMessage=asyncHandler(async(req,res)=>{
      throw new ApiError(403, " content is required ");
    }
 
-   const sender = await User.findById(senderId)
-   if(!sender){
-     throw new ApiError(403 ," sender id is not the valid id");
+   const receiver = await User.findById(receiverId)
+   if(!receiver){
+     throw new ApiError(403 ," receiver id is not the valid id");
    }
 
    const chat = await Chat.findById(chatId);
@@ -176,15 +177,15 @@ const sendMessage=asyncHandler(async(req,res)=>{
      throw new ApiError(403, " chat id is not valid ")
    }
  
-
-    if(!chat.partcipants.include(req?.user._id) || !chat.partcipants.include(senderId)){
+    console.log(chat);
+    if(!chat?.participants.includes(req?.user._id) || !chat?.participants.includes(receiverId)){
        throw new ApiError(402," receiver or sender are the not the participants ")
     }
 
 
     const createdMessage= await Message.create({
-      sender:senderId,
-      receiver:req?.user?._id,
+      receiver:receiverId,
+      sender:req?.user?._id,
       content:content,
       chat:chatId,
     });
@@ -197,6 +198,16 @@ const sendMessage=asyncHandler(async(req,res)=>{
     }
    })
 
-   return res.status(200).json(new ApiResponse(200,createdMessage," message send successfully "))
+   const messageOutput = await Message.aggregate([
+    {
+      $match:{
+        _id: new mongoose.Types.ObjectId(createdMessage._id)
+      }
+    },
+    ...chatMessageCommonAggregate()
+   ])
+
+   console.log(messageOutput)
+   return res.status(200).json(new ApiResponse(200,messageOutput," message send successfully "))
 })
 export { getAllMessage ,deleteMessage,sendMessage}
