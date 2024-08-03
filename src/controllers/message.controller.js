@@ -1,5 +1,5 @@
 // send a message
-// delete the message
+// delete the messageś
 // get all message
 
 import { Chat } from "../models/chat.model.js";

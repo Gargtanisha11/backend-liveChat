@@ -1,13 +1,13 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const messageSchema= new mongoose.Schema({
     sender:{
-        type:new mongoose.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:"user",
         required:true,
     },
     receiver:{
-        type:new mongoose.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:"user",
         required:true,      
     },
@@ -17,7 +17,7 @@ const messageSchema= new mongoose.Schema({
     },
     
     chat:{
-     type:new mongoose.Types.ObjectId,
+     type:Schema.Types.ObjectId,
      required: true,
      
     },

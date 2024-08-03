@@ -33,25 +33,39 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "all fields are required ");
   }
 
+
+
   // check if user already exist
   const isUserExist = await User.findOne({ $or: [{ userName }, { email }] });
   if (isUserExist) {
     fs.unlinkSync(req.files?.avatar[0]?.path);
     throw new ApiError(400, "user already exist");
   }
+
+
   // get the avatar imaage from req.file
   const avatar = req.files?.avatar[0]?.path;
+
+
 
   // check if avatar is uploaded by user or not
   if (!avatar) {
     throw new ApiError(400, " avatar image is uploaded");
   }
+
+
   // upload the avatar on cloudinary
   const avatarFilePath = await uploadOnCloudinary(avatar);
+  
+
+
   // create the user
+
   if (!avatarFilePath.url) {
     throw new ApiError(500, "error is this " + avatarFilePath);
   }
+
+// create the user
   const createdUser = await User.create({
     fullName,
     userName,
@@ -59,7 +73,6 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     avatar: avatarFilePath?.url,
   });
-
   if (!createdUser) {
     throw new ApiError(500, "something gone wrong while creating the user");
   }
@@ -67,6 +80,7 @@ const registerUser = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse(200, createdUser, "successfully created the user"));
 });
+
 
 const loginUser = asyncHandler(async (req, res) => {
   // get the user name or email and password

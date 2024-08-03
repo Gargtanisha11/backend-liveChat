@@ -1,24 +1,24 @@
-import mongoose from "mongoose"
+import mongoose, { Schema } from "mongoose"
 
 const chatSchema = new mongoose.Schema({
     participants:[
         {
-            type:new mongoose.Types.ObjectId,
+            type:Schema.Types.ObjectId,
             ref:"User"
         }
     ],
     message:[
         {
-            type:new mongoose.Types.ObjectId,
+            type:Schema.Types.ObjectId,
             ref:'Message'
         }
     ],
     lastMessage:{
-       type: new mongoose.Types.ObjectId,
+       type: Schema.Types.ObjectId,
        ref:"Message"
     }
     
     
 },{timestamps:true}) 
 
-export const Chat = mongoose.model(chatSchema,"Chat");
+export const Chat = mongoose.model("Chat",chatSchema);
