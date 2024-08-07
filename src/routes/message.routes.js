@@ -6,7 +6,7 @@ const router= Router();
 
 router.use(verifyJWT);
 router.route("/getAllMessage/:chatId").get(getAllMessage);
-router.route("/sendMessage/:receiverId/:chatId").post(sendMessage);
+router.route("/sendMessage/:chatId/:receiverId").post(sendMessage);
 router.route("/deleteMessage/:chatId/:messageId").delete(deleteMessage);
 
 

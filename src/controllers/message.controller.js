@@ -50,6 +50,17 @@ const chatMessageCommonAggregate = () => {
       },
     },
     {
+      $addFields:{
+        sender:{$first:"$sender"}
+      }
+    },
+    {
+      $addFields:{
+       receiver: { $first:"$receiver"}
+      }
+    }
+    ,
+    {
       $project: {
         content: 1,
         sender: {
@@ -57,12 +68,14 @@ const chatMessageCommonAggregate = () => {
           fullName: 1,
           email: 1,
           avatar: 1,
+          _id:1
         },
         receiver: {
           name: 1,
           fullName: 1,
           email: 1,
           avatar: 1,
+          _id:1
         },
         readStatus: 1,
         creadtedAt: 1,
@@ -84,20 +97,29 @@ const getAllMessage = asyncHandler(async (req, res) => {
     throw new ApiError(402, " not exist chat ");
   }
 
-  if (!selectedChatId?.participants.include(req?.user?.id)) {
+  if (!selectedChatId?.participants.includes(req?.user?.id)) {
     throw new ApiError(401, " user is not the participant of this chat ");
   }
 
-  const payload = await Chat.aggregate([
+  const payload = await Message.aggregate([
     {
       $match: {
         chat: new mongoose.Types.ObjectId(chatId),
       },
     },
+    {
+      $lookup:{
+        from :"messages",
+        localField:"messages",
+        foreignField:"_id",
+        as:"messages"
+      },
+      
+    },
     ...chatMessageCommonAggregate(),
   ]);
 
-  if (!payload) {
+  if (!payload.length) {
     throw new ApiError(402, "not exist the chat ");
   }
 
@@ -125,7 +147,7 @@ const deleteMessage = asyncHandler(async (req, res) => {
     throw new ApiError(402, " chat id is not  valid ");
   }
 
-  if (!message?.sender.equals(req.user)) {
+  if (!message?.sender.equals(req.user._id)) {
     throw new ApiError(
       402,
       "  user is not the sender can't delete the message"
@@ -137,16 +159,17 @@ const deleteMessage = asyncHandler(async (req, res) => {
       message: messageId,
     },
   });
-
+  
   const deletedMessage = await Message.aggregate([
     {
       $match: {
-        _id: messageId,
+        _id: new mongoose.Types.ObjectId(messageId),
       },
     },
-    ...chatMessageCommonAggregate(),
+    ...chatMessageCommonAggregate(), // Ensure this function call returns an array
   ]);
-
+  
+  
   await Message.findByIdAndDelete(messageId);
 
   return res
@@ -176,8 +199,11 @@ const sendMessage=asyncHandler(async(req,res)=>{
    if(!chat){
      throw new ApiError(403, " chat id is not valid ")
    }
- 
-    console.log(chat);
+   
+   if(req?.user?._id.toString()==receiverId){
+    throw new ApiError(403, " sender and recievr can't be same ")
+   }
+    
     if(!chat?.participants.includes(req?.user._id) || !chat?.participants.includes(receiverId)){
        throw new ApiError(402," receiver or sender are the not the participants ")
     }

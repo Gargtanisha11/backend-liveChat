@@ -32,6 +32,12 @@
   ## note add socket event on the server as well 
    26. add chat controllers ( createOrGetChat, deleteChat , getAllChats);
    27. add message controllers ( getAllMessage, sendMessage, deleteMesssage)
+   28. debugging of all controller
+   
+   
+    ## to do
+      create a chat and send message and add them in chat and again debugg create or get chat controller 
+      debugg all remaining controllers 
 
 ### todo 
    read abt process
