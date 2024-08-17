@@ -6,7 +6,7 @@ import { createOrGetChat, deleteChat, getAllChats } from "../controllers/chat.co
  const router =Router();
 
  router.use(verifyJWT);
-router.route("/getAllchat/").get(getAllChats);
+router.route("/getAllChat/").get(getAllChats);
 router.route("/createChat/:receiverId").post(createOrGetChat);
 router.route("/deleteChat/:chatId").delete(deleteChat);
 
