@@ -1,7 +1,7 @@
 // controller create chat , get message List  , add chat list to its participants, delete chat list
 
 import mongoose from "mongoose";
-import {User} from  "../models/user.model.js";
+import { User } from "../models/user.model.js";
 import { Chat } from "../models/chat.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -16,16 +16,16 @@ const chatCommonAggregation = () => {
         localField: "participants",
         foreignField: "_id",
         as: "participants",
-        pipeline:[
+        pipeline: [
           {
-            $project:{
-              userName:1,
-              fullName:1,
-              email:1,
-              avatar:1              
-            }
-          }
-        ]
+            $project: {
+              userName: 1,
+              fullName: 1,
+              email: 1,
+              avatar: 1,
+            },
+          },
+        ],
       },
     },
     {
@@ -52,12 +52,6 @@ const chatCommonAggregation = () => {
               ],
             },
           },
-          {
-            $addFields: {
-              lastMessage: { $first: "$lastMessage" },
-            },
-          },
-          
         ],
       },
     },
@@ -80,28 +74,30 @@ const createOrGetChat = asyncHandler(async (req, res) => {
 
   // check if there is already any chat with same participants
   const alreadyChat = await Chat.aggregate([
-     {
-       $match:{
-        participants:{
-          $all:[new mongoose.Types.ObjectId(receiverId),new mongoose.Types.ObjectId(req?.user?._id)]}
-       }
-     },
+    {
+      $match: {
+        participants: {
+          $all: [
+            new mongoose.Types.ObjectId(receiverId),
+            new mongoose.Types.ObjectId(req?.user?._id),
+          ],
+        },
+      },
+    },
 
     ...chatCommonAggregation(),
   ]);
-  
-  if (alreadyChat.length!=0) {
+
+  if (alreadyChat.length != 0) {
     return res
       .status(200)
       .json(new ApiResponse(200, alreadyChat, " get the chat list "));
   }
 
-
   const newChatInstance = await Chat.create({
     participants: [req.user?._id, receiverId],
   });
 
-  
   const createdChat = await Chat.aggregate([
     {
       $match: {
@@ -115,20 +111,18 @@ const createOrGetChat = asyncHandler(async (req, res) => {
     throw new ApiError(501, " not able to create chat");
   }
 
-  await User.findByIdAndUpdate( req.user._id,{
-    $push:{
-      chatList:newChatInstance?._id
-    }
-  },
-  ) 
+  await User.findByIdAndUpdate(req.user._id, {
+    $push: {
+      chatList: newChatInstance?._id,
+    },
+  });
 
+  await User.findByIdAndUpdate(receiverId, {
+    $push: {
+      chatList: newChatInstance?._id,
+    },
+  });
 
-  await User.findByIdAndUpdate(receiverId,{
-    $push:{
-      chatList:newChatInstance?._id
-    }
-  })
-   
   // emit the chat using socket to other participant
 
   return res
@@ -145,50 +139,45 @@ const deleteChat = asyncHandler(async (req, res) => {
 
   const payload = await Chat.aggregate([
     {
-     $match: {
+      $match: {
         _id: new mongoose.Types.ObjectId(chatId),
       },
     },
-   ...chatCommonAggregation(),
-
+    ...chatCommonAggregation(),
   ]);
 
-  if (payload.length==0) {
+  if (payload.length == 0) {
     throw new ApiError(402, " Chat doesn't exist ");
   }
-  
+
   const isDeleted = await Chat.findByIdAndDelete(chatId);
-  
- // delete chat ids from chatlist of user 
-  payload[0]?.participants.map(async(part)=>{
-     const result = await User.findByIdAndUpdate(part?._id,{
-      $pull:{
-        chatList:chatId
-      }
-    },
-  {new :true})
 
-  
-})
-
-
+  // delete chat ids from chatlist of user
+  payload[0]?.participants.map(async (part) => {
+    const result = await User.findByIdAndUpdate(
+      part?._id,
+      {
+        $pull: {
+          chatList: chatId,
+        },
+      },
+      { new: true }
+    );
+  });
 
   return res
     .status(200)
     .json(new ApiResponse(200, payload, " your chat get deleted "));
 });
 
-
 const getAllChats = asyncHandler(async (req, res) => {
-
   const payload = await Chat.aggregate([
     {
       $match: {
-        participants:{
-          $in:[new mongoose.Types.ObjectId(req?.user?._id)]
-        }   
+        participants: {
+          $in: [new mongoose.Types.ObjectId(req?.user?._id)],
         },
-      
+      },
     },
     ...chatCommonAggregation(),
     {
@@ -196,7 +185,6 @@ const getAllChats = asyncHandler(async (req, res) => {
         createdAt: -1,
       },
     },
-    
   ]);
 
   if (!payload) {

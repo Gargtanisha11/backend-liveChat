@@ -221,6 +221,9 @@ const sendMessage=asyncHandler(async(req,res)=>{
    await Chat.findByIdAndUpdate(chatId,{
     $push:{
       message:createdMessage?._id
+    },
+    $set:{
+      lastMessage:createdMessage?.id
     }
    })
 
