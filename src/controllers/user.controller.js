@@ -97,7 +97,6 @@ const loginUser = asyncHandler(async (req, res) => {
   // send cookie
 
   const { userName, email, password } = req.body;
-  console.log(req.body)
   if (!(userName || email)) {
     throw new ApiError(400, " userName or email is required ");
   }
@@ -141,7 +140,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
-  console.log(user);
 
   return res
     .status(200)
@@ -219,7 +217,6 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 
   user.save({ validateBeforeSave: true });
   const updatedUser = await User.findById(_id).select( "-password -refreshToken ");
-  console.log(updatedUser);
   return res
     .status(200)
     .json(

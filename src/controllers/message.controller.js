@@ -64,13 +64,14 @@ const chatMessageCommonAggregate = () => {
       $project: {
         content: 1,
         sender: {
-          name: 1,
+          userName: 1,
           fullName: 1,
           email: 1,
           avatar: 1,
           _id:1
         },
         receiver: {
+          userName:1,
           name: 1,
           fullName: 1,
           email: 1,
@@ -80,6 +81,7 @@ const chatMessageCommonAggregate = () => {
         readStatus: 1,
         creadtedAt: 1,
         updatedAt: 1,
+        chat:1,
       },
     },
   ];
@@ -236,7 +238,6 @@ const sendMessage=asyncHandler(async(req,res)=>{
     ...chatMessageCommonAggregate()
    ])
 
-   console.log(messageOutput)
    return res.status(200).json(new ApiResponse(200,messageOutput," message send successfully "))
 })
 export { getAllMessage ,deleteMessage,sendMessage}
