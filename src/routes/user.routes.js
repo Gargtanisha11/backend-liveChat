@@ -7,6 +7,7 @@ import {
   updateAccountDetails,
   getChatList,
   getUserDetails,
+  findUser,
 } from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/authenticate.middleware.js";
@@ -30,4 +31,5 @@ router
   );
 router.route("/getUserDetails").get(verifyJWT, getUserDetails);
 router.route("/getChatList").get(verifyJWT, getChatList);
+router.route("/findUser").get(verifyJWT,findUser);
 export default router;

@@ -259,6 +259,34 @@ const getChatList =asyncHandler(async(req,res)=>{
     return res.status(200).json (new ApiError(200, chatList," successfully fetch the chat list"));
 })
 
+ 
+
+ const findUser = asyncHandler(async(req,res)=>{
+     const {userName} = req.body;
+     console.log(userName);
+     const users = await User.aggregate([
+      
+        {
+          $search: {
+            index: "users",
+            text: {
+              query: userName,
+              path: {
+                wildcard: "*"
+              }
+            }
+          }
+        }
+      
+     ])
+     console.log( users)
+
+      if(users.length===0){
+         throw new ApiError( 502," error is happeend in the the search index ")
+      }
+     return res.status(200).json( new ApiResponse(200,users," get the the user"));
+ })
+
 
 // user controller - change password, ,updateAccountDetails( userName, avatar) get user details,get chatList
-export { registerUser, loginUser, logoutUser, changeOldPassword,updateAccountDetails,getUserDetails,getChatList };
+export { registerUser, loginUser, logoutUser, changeOldPassword,updateAccountDetails,getUserDetails,getChatList,findUser };

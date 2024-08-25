@@ -34,10 +34,7 @@
    27. add message controllers ( getAllMessage, sendMessage, deleteMesssage)
    28. debugging of all controller
    
-   
-    ## to do
-      create a chat and send message and add them in chat and again debugg create or get chat controller 
-      debugg all remaining controllers 
+
 
 ### todo 
    read abt process
@@ -45,6 +42,10 @@
 ### info 
  to use experimental feature we write in our script in package.json in dev command (dotenv/config for use type module use to import )(-r dotenv/config  --experimental-json-modules) with previous 
 
+# to do 25 august
+  add pageination in get message controller according to desecending order of there upadtion and similarly for the chat 
 
+ 
+add page index at the backend -done
 
 
