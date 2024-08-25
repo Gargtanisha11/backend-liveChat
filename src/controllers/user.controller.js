@@ -276,11 +276,18 @@ const getChatList =asyncHandler(async(req,res)=>{
               }
             }
           }
+        },
+        {
+          $project:{
+            userName:1,
+            fullName:1,
+            avatar:1,
+          }
         }
       
      ])
      console.log( users)
-
+     
       if(users.length===0){
          throw new ApiError( 502," error is happeend in the the search index ")
       }
