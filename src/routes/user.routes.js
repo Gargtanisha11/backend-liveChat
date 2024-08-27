@@ -31,5 +31,5 @@ router
   );
 router.route("/getUserDetails").get(verifyJWT, getUserDetails);
 router.route("/getChatList").get(verifyJWT, getChatList);
-router.route("/findUser").get(verifyJWT,findUser);
+router.route("/findUser").patch(verifyJWT,findUser);
 export default router;

@@ -262,15 +262,14 @@ const getChatList =asyncHandler(async(req,res)=>{
  
 
  const findUser = asyncHandler(async(req,res)=>{
-     const {userName} = req.body;
-     console.log(userName);
+     const {query} = req.body;
      const users = await User.aggregate([
       
         {
           $search: {
             index: "users",
             text: {
-              query: userName,
+              query: query,
               path: {
                 wildcard: "*"
               }
@@ -286,7 +285,6 @@ const getChatList =asyncHandler(async(req,res)=>{
         }
       
      ])
-     console.log( users)
      
       if(users.length===0){
          throw new ApiError( 502," error is happeend in the the search index ")
