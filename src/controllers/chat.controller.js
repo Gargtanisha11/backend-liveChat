@@ -3,6 +3,7 @@
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Chat } from "../models/chat.model.js";
+import {Message} from "../models/message.model.js"
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -149,6 +150,10 @@ const deleteChat = asyncHandler(async (req, res) => {
   if (payload.length == 0) {
     throw new ApiError(402, " Chat doesn't exist ");
   }
+
+  await Message.deleteMany({
+    chat:chatId
+  })
 
   const isDeleted = await Chat.findByIdAndDelete(chatId);
 

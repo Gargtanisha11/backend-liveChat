@@ -1,8 +1,12 @@
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import {createServer} from"node:http";
+import {Server} from "socket.io"
 
 const app =express();
+
+console.log(process.env.CORS_ORIGIN)
 
 app.use(cors(
    {
@@ -10,7 +14,6 @@ app.use(cors(
       credentials:true
    }
 ))
-
 app.use(cookieParser());
 
 app.use(express.json({limit:"16kb"}))
@@ -23,18 +26,14 @@ app.use(express.urlencoded({
 app.use(express.static("public"))
 
 
-import userRouter from "./routes/user.routes.js";
-import chatRouter from "./routes/chat.routes.js";
-import messageRouter from "./routes/message.routes.js";
+ import userRouter from "./routes/user.routes.js";
+ import chatRouter from "./routes/chat.routes.js";
+ import messageRouter from "./routes/message.routes.js";
 
 
-// app.use("/api/v1/user/register",async(req,res)=>{
-//     console.log(req.body);
-//     return res.status(200);
 
-// })
-app.use("/api/v1/user",userRouter);
-app.use("/api/v1/chat",chatRouter);
-app.use("/api/v1/message",messageRouter);
+ app.use("/api/v1/user",userRouter);
+ app.use("/api/v1/chat",chatRouter);
+ app.use("/api/v1/message",messageRouter);
 
 export {app}

@@ -9,6 +9,8 @@ import { Message } from "../models/message.model.js";
 import {User} from "../models/user.model.js"
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { emitSocketEvent } from "../../socket.js";
+import { CHAT_EVENT_NUM } from "../constant.js";
  // hello 
 /**
  * @description Utility function to get the pipeline which used commonly in every function
@@ -174,6 +176,8 @@ const deleteMessage = asyncHandler(async (req, res) => {
   
   await Message.findByIdAndDelete(messageId);
 
+
+
   return res
     .status(200)
     .json(
@@ -237,6 +241,12 @@ const sendMessage=asyncHandler(async(req,res)=>{
     },
     ...chatMessageCommonAggregate()
    ])
+
+   emitSocketEvent(req.user?._id.toString(),CHAT_EVENT_NUM.RECEIVE_MSG,messageOutput);
+
+   emitSocketEvent(receiverId,CHAT_EVENT_NUM.RECEIVE_MSG,messageOutput);
+
+
 
    return res.status(200).json(new ApiResponse(200,messageOutput," message send successfully "))
 })

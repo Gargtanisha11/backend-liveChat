@@ -42,10 +42,17 @@
 ### info 
  to use experimental feature we write in our script in package.json in dev command (dotenv/config for use type module use to import )(-r dotenv/config  --experimental-json-modules) with previous 
 
-# to do 25 august
-  add pageination in get message controller according to desecending order of there upadtion and similarly for the chat 
+# to do 
+  add pagination in get message controller according to desecending order of there upadation and similarly for the chat
+  debugg the deletet the chat 
 
  
-add page index at the backend -done
 
+
+
+
+# how to add socket at backend 
+ create a separate socket.js file for modular approach {
+    in this create a function that should take server as input for creating the IO instance 
+ }
 
