@@ -9,7 +9,7 @@ import jwt from "jsonwebtoken";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 
-export const verifyJWT = asyncHandler(async (req, _, next) => {
+export const verifyJWT = asyncHandler(async (req, res, next) => {
   const accessToken =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace("Bearer", "").trim();
@@ -21,7 +21,6 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
       accessToken,
       process.env.ACCESS_TOKEN_SECRET
     );
-
     const { _id } = decodedToken;
     if (!_id) {
       throw new ApiError(400, " unauthorized access");
@@ -29,7 +28,8 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
     const user = await User.findById(_id).select("-password");
     req.user = user;
     next();
-  } catch (error) {
+  } 
+  catch (error) {
     throw new ApiError(
       501,
       " something went wrong while verifying the user  the Error is : " + error
