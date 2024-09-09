@@ -3,11 +3,11 @@
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Chat } from "../models/chat.model.js";
-import {Message} from "../models/message.model.js"
+import { Message } from "../models/message.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-
+ 
 const chatCommonAggregation = () => {
   return [
     // get the participant
@@ -43,6 +43,7 @@ const chatCommonAggregation = () => {
               foreignField: "_id",
               as: "sender",
               pipeline: [
+              
                 {
                   $project: {
                     userName: 1,
@@ -53,9 +54,51 @@ const chatCommonAggregation = () => {
               ],
             },
           },
+          {
+            $lookup: {
+              from: "users",
+              localField: "receiver",
+              foreignField: "_id",
+              as: "receiver",
+              pipeline: [
+                {
+                  $addFields:{
+                    receiver:{
+                      $first:"$receiver"
+                    }
+                  }
+                },
+                {
+                  $project: {
+                    userName: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields:{
+              sender:{
+                $first:"$sender"
+              },
+              receiver:{
+                $first:"$receiver"
+              }
+            }
+          },
         ],
       },
     },
+    {
+       $addFields:{
+        lastMessage:{
+          $first:"$lastMessage"
+        }
+       }
+    }
+    
   ];
 };
 const createOrGetChat = asyncHandler(async (req, res) => {
@@ -152,8 +195,8 @@ const deleteChat = asyncHandler(async (req, res) => {
   }
 
   await Message.deleteMany({
-    chat:chatId
-  })
+    chat: chatId,
+  });
 
   const isDeleted = await Chat.findByIdAndDelete(chatId);
 
