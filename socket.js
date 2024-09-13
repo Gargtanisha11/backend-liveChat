@@ -27,7 +27,7 @@ const setUpSocket =(server)=>{
         console.log(msg)
       })
       socket.on('disconnect',(reason,detail)=>{
-        console.log(" socket got disconnected and reason is ",reason, "and details are ",detail)
+        console.log(" socket got disconnected and reason is ",reason)
         for(const [userId,socketId] of userSocketMap.entries()){
           if(socketId===socket.id){
            // console.log(userId,socketId)
